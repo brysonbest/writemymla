@@ -1,7 +1,5 @@
 import streamlit as st
-import os
 import openai as ai
-from PyPDF2 import PdfReader
 import requests
 
 ai.api_key = st.secrets["openai_key"]
