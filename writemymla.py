@@ -195,74 +195,55 @@ if st.session_state.postalcomplete:
 # if the form is submitted run the openai completion
 if st.session_state.requestgeneration:
     # get the letter from openai
-    addressResponse = f"""Their address is: {mla_address}.""" if isAddress else None
+    addressResponse = f"""Address: {mla_address}.""" if isAddress else None
     completion = ai.ChatCompletion.create(
         # model="gpt-3.5-turbo-16k",
         model="gpt-3.5-turbo",
         temperature=ai_temp,
-        messages=[
+        aisuggestedmessages=[
             {
                 "role": "user",
-                "content": f"You will need to generate a letter to my local political representative based on a description of my issues, and how I would like them addressed.",
+                "content": "Generate a letter to my local political representative regarding my issues and desired solutions.",
+            },
+            {
+                "role": "system",
+                "content": "You will need to address the letter to the local political representative using the provided information.",
             },
             {
                 "role": "user",
-                "content": f"Here is the information of the local political representative that I am writing to: Their title is: {mla}. Their name is: {mla_name}. Their party is: {mla_party}. Their email is: {mla_email}. Their phone number is: {mla_phone}. Their district is: {mla_district}. {addressResponse} Use this information to address the letter and content to the correct person.",
+                "content": f"Local Political Representative Information:\nTitle: {mla}\nName: {mla_name}\nParty: {mla_party}\nEmail: {mla_email}\nPhone: {mla_phone}\nDistrict: {mla_district}\n{addressResponse}",
+            },
+            {"role": "user", "content": f"Issues I'm Dealing With:\n{described_issue}"},
+            {"role": "user", "content": f"Sender's Name for the Letter: {user_name}"},
+            {
+                "role": "user",
+                "content": f"Personal Impact of the Issues: {personal_impact}",
             },
             {
                 "role": "user",
-                "content": f"The issues that I am dealing with are: {described_issue}",
+                "content": f"Proposed Resolution for My Issues: {resolution}",
             },
             {
                 "role": "user",
-                "content": f"The sender's name to include on the letter: {user_name}",
+                "content": f"Requested Support from Representative: {support}",
             },
             {
                 "role": "user",
-                "content": f"Here is how this issue is personally connected to myself and how it personally impacts me: {personal_impact}",
+                "content": f"Additional Questions for Representative: {questions}",
+            },
+            {"role": "user", "content": f"Letter Length Limit: 2500 words"},
+            {
+                "role": "user",
+                "content": f"Maintain Professional Tone: Addressing a Political Representative",
             },
             {
                 "role": "user",
-                "content": f"Here is my proposed resolution for my issues: {resolution}",
+                "content": f"Writer Would Like to Be Contacted About the Issue and Kept Informed",
             },
+            {"role": "user", "content": f"Use Writer's Name: {user_name}"},
             {
                 "role": "user",
-                "content": f"Here is how I would like my representative to help or support me: {support}",
-            },
-            {
-                "role": "user",
-                "content": f"These are additional related questions that I have for my representative: {questions}",
-            },
-            {
-                "role": "user",
-                "content": f"The letter should not be longer than 2500 words.",
-            },
-            {
-                "role": "user",
-                "content": f""" 
-        In the letter, keep the content professional. You are writing to a political representative and trying to bring attention to your specific issues and concerns.
-        """,
-            },
-            # Maybe include additional segments on specific structure of the letter
-            #     {
-            #         "role": "user",
-            #         "content": f"""
-            # In the first paragraph introduce the writer and indicate the issue and how the writer is personally connected to the issue.
-            # """,
-            #     },
-            {
-                "role": "user",
-                "content": f""" 
-        Note that the writer would like to be contacted about this issue, and would like to be kept aware of any updates towards resolving their issue.
-            """,
-            },
-            {
-                "role": "user",
-                "content": f"Use {user_name} as the writer of the letter",
-            },
-            {
-                "role": "user",
-                "content": f"Generate a specific letter to my local political representative based on the information above. Prioritize the issue and the personal impacts and connections of that issue. Generate the response and include appropriate spacing between the paragraph text.",
+                "content": f"Generate a letter to the local political representative emphasizing the issue, its personal impact, and potential solutions.",
             },
         ],
     )
