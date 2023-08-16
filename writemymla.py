@@ -4,8 +4,8 @@ import openai as ai
 from PyPDF2 import PdfReader
 import requests
 
-# ai.api_key = st.secrets["openai_key"]
-ai.api_key = "sk-xxx"
+ai.api_key = st.secrets["openai_key"]
+# ai.api_key = "sk-xxx"
 # how creative the AI should be
 ai_temp = 0.99
 
