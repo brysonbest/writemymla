@@ -144,8 +144,8 @@ if st.session_state.postalcomplete:
                 )
                 described_issue = st.text_area(
                     "1. What is your Issue? Why are you writing your MLA?",
-                    max_chars=250,
-                    help="Max 250 characters.",
+                    max_chars=500,
+                    help="Max 500 characters.",
                 )
                 issue = st.text_area(
                     "2. Why is this issue concerning to you?",
@@ -200,6 +200,9 @@ if st.session_state.requestgeneration:
         # model="gpt-3.5-turbo-16k",
         model="gpt-3.5-turbo",
         temperature=ai_temp,
+        # optimized input to 421 tokens
+        # text input at 1 question @ 500 and 5 questions @ 250 characters ~ 1750 characters ~ 300 tokens
+        # response of 1000 words should be maximum of 3000 tokens
         aisuggestedmessages=[
             {
                 "role": "user",
@@ -231,7 +234,7 @@ if st.session_state.requestgeneration:
                 "role": "user",
                 "content": f"Additional Questions for Representative: {questions}",
             },
-            {"role": "user", "content": f"Letter Length Limit: 2500 words"},
+            {"role": "user", "content": f"Letter Length Limit: 1000 words"},
             {
                 "role": "user",
                 "content": f"Maintain Professional Tone: Addressing a Political Representative",
