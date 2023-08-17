@@ -4,13 +4,11 @@ import requests
 from datetime import date
 
 ai.api_key = st.secrets["openai_key"]
-# ai.api_key = "sk-xxx"
+
 # how creative the AI should be
 ai_temp = 0.99
 
-# To fix form state on change.
-
-# Initialize some state for showing postal
+# Initialize some state
 if "postalcomplete" not in st.session_state:
     st.session_state.postalcomplete = False
 
@@ -31,6 +29,11 @@ def postal_submit():
 def restart_form():
     st.session_state.postalcomplete = False
     st.session_state.requestgeneration = False
+
+
+# Callback function to make sure the state changes with each button click
+def clear_incomplete_inprogress():
+    st.session_state.formincomplete = False
 
 
 def request_letter_generation():
@@ -75,11 +78,17 @@ Additionally, if you'd like to use this website without limits, you can use your
     % openAIAPIlink
 )
 
-useownkeyagree = st.checkbox("I agree, use my own key!")
+useownkeyagree = st.checkbox(
+    "I agree, use my own key!", disabled=st.session_state.requestgeneration
+)
 
 if useownkeyagree:
     st.write("Great! Your key will be used during this application.")
-    personal_key = st.text("Enter key here", help="The key should begin with sk-")
+    personal_key = st.text_input(
+        "Enter key here:",
+        help="The key should begin with sk-",
+        disabled=st.session_state.requestgeneration,
+    )
 
 with st.form("postal_form"):
     # other inputs
