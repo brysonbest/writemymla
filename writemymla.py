@@ -196,63 +196,78 @@ if st.session_state.postalcomplete:
 if st.session_state.requestgeneration:
     # get the letter from openai
     addressResponse = f"""Address: {mla_address}.""" if isAddress else None
-    completion = ai.ChatCompletion.create(
-        # model="gpt-3.5-turbo-16k",
-        model="gpt-3.5-turbo",
-        temperature=ai_temp,
-        # optimized input to 421 tokens
-        # text input at 1 question @ 500 and 5 questions @ 250 characters ~ 1750 characters ~ 300 tokens
-        # response of 1000 words should be maximum of 3000 tokens
-        aisuggestedmessages=[
-            {
-                "role": "user",
-                "content": "Generate a letter to my local political representative regarding my issues and desired solutions.",
-            },
-            {
-                "role": "system",
-                "content": "You will need to address the letter to the local political representative using the provided information.",
-            },
-            {
-                "role": "user",
-                "content": f"Local Political Representative Information:\nTitle: {mla}\nName: {mla_name}\nParty: {mla_party}\nEmail: {mla_email}\nPhone: {mla_phone}\nDistrict: {mla_district}\n{addressResponse}",
-            },
-            {"role": "user", "content": f"Issues I'm Dealing With:\n{described_issue}"},
-            {"role": "user", "content": f"Sender's Name for the Letter: {user_name}"},
-            {
-                "role": "user",
-                "content": f"Personal Impact of the Issues: {personal_impact}",
-            },
-            {
-                "role": "user",
-                "content": f"Proposed Resolution for My Issues: {resolution}",
-            },
-            {
-                "role": "user",
-                "content": f"Requested Support from Representative: {support}",
-            },
-            {
-                "role": "user",
-                "content": f"Additional Questions for Representative: {questions}",
-            },
-            {"role": "user", "content": f"Letter Length Limit: 1000 words"},
-            {
-                "role": "user",
-                "content": f"Maintain Professional Tone: Addressing a Political Representative",
-            },
-            {
-                "role": "user",
-                "content": f"Writer Would Like to Be Contacted About the Issue and Kept Informed",
-            },
-            {"role": "user", "content": f"Use Writer's Name: {user_name}"},
-            {
-                "role": "user",
-                "content": f"Generate a letter to the local political representative emphasizing the issue, its personal impact, and potential solutions.",
-            },
-        ],
-    )
+    try:
+        completion = ai.ChatCompletion.create(
+            # model="gpt-3.5-turbo-16k",
+            model="gpt-3.5-turbo",
+            temperature=ai_temp,
+            # optimized input to 421 tokens
+            # text input at 1 question @ 500 and 5 questions @ 250 characters ~ 1750 characters ~ 300 tokens
+            # response of 1000 words should be maximum of 3000 tokens
+            aisuggestedmessages=[
+                {
+                    "role": "user",
+                    "content": "Generate a letter to my local political representative regarding my issues and desired solutions.",
+                },
+                {
+                    "role": "system",
+                    "content": "You will need to address the letter to the local political representative using the provided information.",
+                },
+                {
+                    "role": "user",
+                    "content": f"Local Political Representative Information:\nTitle: {mla}\nName: {mla_name}\nParty: {mla_party}\nEmail: {mla_email}\nPhone: {mla_phone}\nDistrict: {mla_district}\n{addressResponse}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Issues I'm Dealing With:\n{described_issue}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Sender's Name for the Letter: {user_name}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Personal Impact of the Issues: {personal_impact}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Proposed Resolution for My Issues: {resolution}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Requested Support from Representative: {support}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Additional Questions for Representative: {questions}",
+                },
+                {"role": "user", "content": f"Letter Length Limit: 1000 words"},
+                {
+                    "role": "user",
+                    "content": f"Maintain Professional Tone: Addressing a Political Representative",
+                },
+                {
+                    "role": "user",
+                    "content": f"Writer Would Like to Be Contacted About the Issue and Kept Informed",
+                },
+                {"role": "user", "content": f"Use Writer's Name: {user_name}"},
+                {
+                    "role": "user",
+                    "content": f"Generate a letter to the local political representative emphasizing the issue, its personal impact, and potential solutions.",
+                },
+            ],
+        )
+        response_out = completion["choices"][0]["message"]["content"]
+        st.write(response_out)
+    except requests.exceptions.HTTPError as error:
+        st.markdown(
+            f"""
+    # Sorry, there was an error sending your responses to chatGPT for generation.
+    ## Please try again later.
 
-    response_out = completion["choices"][0]["message"]["content"]
-    st.write(response_out)
+    """
+        )
+        print(error)
 
     # include an option to download a txt file
     st.download_button("Download the letter", response_out)
