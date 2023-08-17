@@ -1,6 +1,7 @@
 import streamlit as st
 import openai as ai
 import requests
+from datetime import date
 
 ai.api_key = st.secrets["openai_key"]
 # ai.api_key = "sk-xxx"
@@ -16,6 +17,9 @@ if "postalcomplete" not in st.session_state:
 if "requestgeneration" not in st.session_state:
     st.session_state.requestgeneration = False
 
+if "formincomplete" not in st.session_state:
+    st.session_state.formincomplete = False
+
 
 # Callback function to make sure the state changes with each button click
 def postal_submit():
@@ -30,7 +34,20 @@ def restart_form():
 
 
 def request_letter_generation():
-    st.session_state.requestgeneration = not st.session_state.requestgeneration
+    if (
+        mla_name
+        and mla_email
+        and user_name
+        and described_issue
+        and personal_impact
+        and resolution
+        and support
+        and questions
+    ):
+        st.session_state.requestgeneration = not st.session_state.requestgeneration
+        st.session_state.formincomplete = False
+    else:
+        st.session_state.formincomplete = True
 
 
 st.markdown(
@@ -130,6 +147,7 @@ if st.session_state.postalcomplete:
             )
 
             st.write("You can edit these details if you'd like to change them.")
+            mla = mla
             mla_name = st.text_input(f"""{mla} Name""", value=mla_name)
             mla_party = st.text_input(f"""{mla} Party""", value=mla_party)
             mla_email = st.text_input(f"""{mla} Email""", value=mla_email)
@@ -147,28 +165,23 @@ if st.session_state.postalcomplete:
                     max_chars=500,
                     help="Max 500 characters.",
                 )
-                issue = st.text_area(
-                    "2. Why is this issue concerning to you?",
-                    max_chars=250,
-                    help="Max 250 characters.",
-                )
                 personal_impact = st.text_area(
-                    "3. Are you personally connected to or impacted by this issue? Please tell me how you might be personally impacted, or how you are personally connected to this issue.",
+                    "2. Are you personally connected to or impacted by this issue? Please tell me how you might be personally impacted, or how you are personally connected to this issue.",
                     max_chars=250,
                     help="Max 250 characters.",
                 )
                 resolution = st.text_area(
-                    "4. How do you want this issue to be resolved?",
+                    "3. How do you want this issue to be resolved?",
                     max_chars=250,
                     help="Max 250 characters.",
                 )
                 support = st.text_area(
-                    "5. What support, specific help, or action do you need from your MLA?",
+                    "4. What support, specific help, or action do you need from your MLA?",
                     max_chars=250,
                     help="Max 250 characters.",
                 )
                 questions = st.text_area(
-                    "6. Do you have any questions you would like answered by your MLA? Enter your questions here:",
+                    "5. Do you have any questions you would like answered by your MLA? Enter your questions here:",
                     max_chars=250,
                     help="Max 250 characters.",
                 )
@@ -192,8 +205,14 @@ if st.session_state.postalcomplete:
         print(error)
 
 
+if st.session_state.formincomplete:
+    st.warning(
+        "You are missing some information. Please check the form and confirm that everything is completed."
+    )
+
 # if the form is submitted run the openai completion
 if st.session_state.requestgeneration:
+    # check for completed form:
     # get the letter from openai
     addressResponse = f"""Address: {mla_address}.""" if isAddress else None
     try:
@@ -258,16 +277,56 @@ if st.session_state.requestgeneration:
             ],
         )
         response_out = completion["choices"][0]["message"]["content"]
+
+        st.markdown(f"""# Your Generated Letter: """)
+        st.divider()
         st.write(response_out)
-    except requests.exceptions.HTTPError as error:
+        st.divider()
+
+        # create custom email link with response in body
+        email_body = response_out.replace(" ", "%20").replace("\n", "%0A")
+        email_date = date.today()
+        email_user = user_name.replace(" ", "%20")
+        email_mla = mla.replace(" ", "%20")
+        email_mla_name = mla_name.replace(" ", "%20")
+        email_subject = (
+            f"""{email_user}%20-{email_date}%20to%20{mla}%20{email_mla_name}"""
+        )
+        email_link = f"""mailto:{mla_email}?subject={email_subject}&body={email_body}"""
+
         st.markdown(
             f"""
-    # Sorry, there was an error sending your responses to chatGPT for generation.
-    ## Please try again later.
+                # What to do next:
 
-    """
+                ## It is always important to check your letter for any mistakes or misunderstandings. You are also able to make any changes that you want, and add any information that you want.
+                ## 1. You can download this letter in multiple formats, with the option to send directly as is to your local representative.
+                ## 2. You can send it as an email by clicking on this link: [link](%s). Before sending the email, you should check to confirm that all information in the email is correct.
+                """
+            % email_link
         )
-        print(error)
+        # include an option to download a txt file
+        st.download_button("Download the letter", response_out)
 
-    # include an option to download a txt file
-    st.download_button("Download the letter", response_out)
+    except ai.error.RateLimitError as error:
+        print(error)
+        st.markdown(
+            f"""
+            # Sorry, there was an error sending your responses to chatGPT for generation, as the service has run out of free generation for this month.
+            ### As a non-profit service, there are a limited number of letters that may be generated in a month.
+            
+            If you are interested in supporting this project, and increasing the number of available generations, please consider making a donation. All proceeds go directly towards the ongoing support of this web application. If you make a donation, it will usually take 24-48 hours before funding is added to this website and letters can continue to be generated.
+            
+            Otherwise, please try again later. Once donations are exhausted, the limit will reset naturally every month.
+            
+            If you are a non-profit or developer looking to provide similar support, this application is available as an open-source project, and you can freely deploy a version of it yourself.
+
+            """
+        )
+    except:
+        st.markdown(
+            f"""
+                # Sorry, there was an error sending your responses to chatGPT for generation.
+                ## Please try again.
+
+                """
+        )
