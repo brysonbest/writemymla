@@ -50,17 +50,36 @@ def request_letter_generation():
         st.session_state.formincomplete = True
 
 
+github_link = "https://github.com/brysonbest/writemymla"
 st.markdown(
     """
-# 📝 Write to your Local Provincial Representative with the help of AI
+# 📝 Write to your Local Provincial Representative with the help of AI - Canada Only
 
 ## Dependening on your Province, your local representative may be called an MLA, MPP, MNA, or MHA. This tool will help you generate a letter to your representative. All you need to do is:
 
 1. Enter your postal code in order to find the local representative.
 2. Provide some details about the issue you want to write about.
 3. Download your letter to send to your representative! You can choose to then print it off and mail it in, or email it to your representative.
+
+This application uses the OpenAI API, which is currently a paid model. Due to this, there are limited resources, and capacity for this website may be reached quickly. If you're a developer, or a non-profit interested in creating a verison of this website, it is available open source here: [link](%s). You can launch your own version of this website in order to help you support your non-profit and local consituents.
 """
+    % github_link
 )
+
+openAIAPIlink = "https://openai.com/blog/openai-api"
+
+st.markdown(
+    """
+Additionally, if you'd like to use this website without limits, you can use your own [openAI API key](%s). You must consent to the use of your key through this portal. For your protection and privacy, the key is not saved, and is sent directly to the openAI API when you request your letter generated.
+"""
+    % openAIAPIlink
+)
+
+useownkeyagree = st.checkbox("I agree, use my own key!")
+
+if useownkeyagree:
+    st.write("Great! Your key will be used during this application.")
+    personal_key = st.text("Enter key here", help="The key should begin with sk-")
 
 with st.form("postal_form"):
     # other inputs
@@ -215,6 +234,8 @@ if st.session_state.requestgeneration:
     # check for completed form:
     # get the letter from openai
     addressResponse = f"""Address: {mla_address}.""" if isAddress else None
+    if useownkeyagree and personal_key and len(personal_key) > 0:
+        ai.api_key = personal_key
     try:
         completion = ai.ChatCompletion.create(
             # model="gpt-3.5-turbo-16k",
