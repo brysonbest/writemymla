@@ -18,6 +18,9 @@ if "requestgeneration" not in st.session_state:
 if "formincomplete" not in st.session_state:
     st.session_state.formincomplete = False
 
+if "formprogress" not in st.session_state:
+    st.session_state.formprogress = 0
+
 
 # Callback function to make sure the state changes with each button click
 def postal_submit():
@@ -36,7 +39,40 @@ def clear_incomplete_inprogress():
     st.session_state.formincomplete = False
 
 
-def request_letter_generation():
+# def request_letter_generation():
+#     if (
+#         mla_name
+#         and mla_email
+#         and user_name
+#         and described_issue
+#         and personal_impact
+#         and resolution
+#         and support
+#         and questions
+#     ):
+#         if st.session_state.formincomplete:
+#             st.session_state.formincomplete = False
+#         st.session_state.requestgeneration = not st.session_state.requestgeneration
+#         st.session_state.formprogress = st.session_state.formprogress + 1
+
+#     else:
+#         st.session_state.formincomplete = True
+
+
+def request_letter_generation(
+    user_name, described_issue, personal_impact, resolution, support, questions
+):
+    print(
+        "this should have everything",
+        mla_name,
+        mla_email,
+        user_name,
+        described_issue,
+        personal_impact,
+        resolution,
+        support,
+        questions,
+    )
     if (
         mla_name
         and mla_email
@@ -47,10 +83,14 @@ def request_letter_generation():
         and support
         and questions
     ):
-        st.session_state.formincomplete = False
+        if st.session_state.formincomplete:
+            st.session_state.formincomplete = False
         st.session_state.requestgeneration = not st.session_state.requestgeneration
+
     else:
         st.session_state.formincomplete = True
+
+    st.session_state.formprogress += 1
 
 
 github_link = "https://github.com/brysonbest/writemymla"
@@ -214,10 +254,20 @@ if st.session_state.postalcomplete:
                     help="Max 250 characters.",
                 )
 
+                mla_name = mla_name
+                mla_email = mla_email
+
                 # submit button
                 submitted = st.form_submit_button(
                     "Generate MLA Letter",
-                    on_click=request_letter_generation,
+                    on_click=request_letter_generation(
+                        user_name,
+                        described_issue,
+                        personal_impact,
+                        resolution,
+                        support,
+                        questions,
+                    ),
                     disabled=st.session_state.requestgeneration,
                 )
 
@@ -232,8 +282,7 @@ if st.session_state.postalcomplete:
         )
         print(error)
 
-
-if st.session_state.formincomplete:
+if st.session_state.formincomplete and st.session_state.formprogress > 1:
     st.warning(
         "You are missing some information. Please check the form and confirm that everything is completed."
     )
@@ -350,8 +399,13 @@ if st.session_state.requestgeneration:
             
             If you are a non-profit or developer looking to provide similar support, this application is available as an open-source project, and you can freely deploy a version of it yourself.
 
+            If you'd like to download your information as a text file so that you can easily enter it again in the future, you can use the download link below:
+
             """
         )
+        # TO COMPLETE
+        inputTotal = "This must be completed"
+        st.download_button("Download your input", inputTotal)
     except:
         st.markdown(
             f"""
