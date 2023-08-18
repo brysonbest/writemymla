@@ -98,7 +98,7 @@ st.markdown(
     """
 # 📝 Write to your Local Provincial Representative with the help of AI - Canada Only
 
-## Dependening on your Province, your local representative may be called an MLA, MPP, MNA, or MHA. This tool will help you generate a letter to your representative. All you need to do is:
+## Depending on your Province, your local representative may be called an MLA, MPP, MNA, or MHA. This tool will help you generate a letter to your representative. All you need to do is:
 
 1. Enter your postal code in order to find the local representative.
 2. Provide some details about the issue you want to write about.
@@ -146,6 +146,14 @@ with st.form("postal_form"):
 
 submitted = False
 mla_form_options = False
+
+formQuestions = {
+    "issue": "What is your Issue? Why are you writing your representative?",
+    "personal": "Are you personally connected to or impacted by this issue? Please tell me how you might be personally impacted, or how you are personally connected to this issue.",
+    "resolve": "How do you want this issue to be resolved?",
+    "support": "What support, specific help, or action do you need from your representative?",
+    "questions": "Do you have any questions you would like answered by your representative? Enter your questions here:",
+}
 
 if st.session_state.postalcomplete:
     st.button("Restart", on_click=restart_form)
@@ -229,27 +237,27 @@ if st.session_state.postalcomplete:
                     "Please enter your name as you'd like it to appear in the letter."
                 )
                 described_issue = st.text_area(
-                    "1. What is your Issue? Why are you writing your MLA?",
+                    f"""1. {formQuestions['issue']}""",
                     max_chars=500,
                     help="Max 500 characters.",
                 )
                 personal_impact = st.text_area(
-                    "2. Are you personally connected to or impacted by this issue? Please tell me how you might be personally impacted, or how you are personally connected to this issue.",
+                    f"""2. {formQuestions['personal']}""",
                     max_chars=250,
                     help="Max 250 characters.",
                 )
                 resolution = st.text_area(
-                    "3. How do you want this issue to be resolved?",
+                    f"""3. {formQuestions['resolve']}""",
                     max_chars=250,
                     help="Max 250 characters.",
                 )
                 support = st.text_area(
-                    "4. What support, specific help, or action do you need from your MLA?",
+                    f"""4. {formQuestions['support']}""",
                     max_chars=250,
                     help="Max 250 characters.",
                 )
                 questions = st.text_area(
-                    "5. Do you have any questions you would like answered by your MLA? Enter your questions here:",
+                    f"""5. {formQuestions['questions']}""",
                     max_chars=250,
                     help="Max 250 characters.",
                 )
@@ -259,7 +267,7 @@ if st.session_state.postalcomplete:
 
                 # submit button
                 submitted = st.form_submit_button(
-                    "Generate MLA Letter",
+                    "Generate Letter to your Representative",
                     on_click=request_letter_generation(
                         user_name,
                         described_issue,
@@ -399,18 +407,50 @@ if st.session_state.requestgeneration:
             
             If you are a non-profit or developer looking to provide similar support, this application is available as an open-source project, and you can freely deploy a version of it yourself.
 
-            If you'd like to download your information as a text file so that you can easily enter it again in the future, you can use the download link below:
+            If you'd like to download your information as a text file so that you can easily enter it again in the future, you can use the download link below.
 
             """
         )
-        # TO COMPLETE
-        inputTotal = "This must be completed"
-        st.download_button("Download your input", inputTotal)
+
     except:
         st.markdown(
             f"""
                 # Sorry, there was an error sending your responses to chatGPT for generation.
                 ## Please try again.
-
                 """
         )
+
+    inputTotal = f"""Your Information:
+
+    Your Provincial Official:
+    
+    {mla} {mla_name}
+    Party: {mla_party} 
+    Email: {mla_email} 
+    Phone: {mla_phone} 
+    District: {mla_district} 
+    Address: {mla_address} 
+
+    Your Input:
+    Name: {user_name}
+
+    {formQuestions['issue']}
+    {described_issue}
+
+    {formQuestions['personal']}
+    {personal_impact}
+
+    {formQuestions['resolve']}
+    {resolution}
+
+    {formQuestions['support']}
+    {support}
+
+    {formQuestions['questions']}
+    {questions}
+    """
+    st.download_button(
+        "Download a copy of your entered information. This download your text and reset the form.",
+        inputTotal,
+        on_click=restart_form,
+    )
