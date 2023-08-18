@@ -39,40 +39,9 @@ def clear_incomplete_inprogress():
     st.session_state.formincomplete = False
 
 
-# def request_letter_generation():
-#     if (
-#         mla_name
-#         and mla_email
-#         and user_name
-#         and described_issue
-#         and personal_impact
-#         and resolution
-#         and support
-#         and questions
-#     ):
-#         if st.session_state.formincomplete:
-#             st.session_state.formincomplete = False
-#         st.session_state.requestgeneration = not st.session_state.requestgeneration
-#         st.session_state.formprogress = st.session_state.formprogress + 1
-
-#     else:
-#         st.session_state.formincomplete = True
-
-
 def request_letter_generation(
     user_name, described_issue, personal_impact, resolution, support, questions
 ):
-    print(
-        "this should have everything",
-        mla_name,
-        mla_email,
-        user_name,
-        described_issue,
-        personal_impact,
-        resolution,
-        support,
-        questions,
-    )
     if (
         mla_name
         and mla_email
@@ -94,41 +63,56 @@ def request_letter_generation(
 
 
 github_link = "https://github.com/brysonbest/writemymla"
+donation_link = "https://www.buymeacoffee.com/brysonbest"
 st.markdown(
     """
-# 📝 Write to your Local Provincial Representative with the help of AI - Canada Only
+# 📝       🇨🇦Connect with Your Provincial Representative Effortlessly Using AI Assistance
 
-## Depending on your Province, your local representative may be called an MLA, MPP, MNA, or MHA. This tool will help you generate a letter to your representative. All you need to do is:
+## Whether your Provincial Representative is known as an MLA, MPP, MNA, or MHA, our tool is designed to aid you in crafting a letter to express your concerns. The process is simple:
 
-1. Enter your postal code in order to find the local representative.
-2. Provide some details about the issue you want to write about.
-3. Download your letter to send to your representative! You can choose to then print it off and mail it in, or email it to your representative.
+1. Enter your postal code to identify your local representative.
+2. Provide key details about the matter you wish to address.
+3. Obtain your ready-to-use letter for sending!
 
-This application uses the OpenAI API, which is currently a paid model. Due to this, there are limited resources, and capacity for this website may be reached quickly. If you're a developer, or a non-profit interested in creating a verison of this website, it is available open source here: [link](%s). You can launch your own version of this website in order to help you support your non-profit and local consituents.
+You can choose to print and mail the letter or email it to your representative. Please note that this application utilizes the OpenAI API, a subscription-based service. Resources are limited, so the website's capacity may be quickly reached. Limits are reset monthly.
+
+If you find this website useful and would like to contribute to its running costs, consider [supporting the project](%s)
+
 """
-    % github_link
+    % donation_link
 )
 
-openAIAPIlink = "https://openai.com/blog/openai-api"
 
-st.markdown(
-    """
-Additionally, if you'd like to use this website without limits, you can use your own [openAI API key](%s). You must consent to the use of your key through this portal. For your protection and privacy, the key is not saved, and is sent directly to the openAI API when you request your letter generated.
-"""
-    % openAIAPIlink
-)
+with st.expander("Information for Developers and Non-Profits."):
+    st.markdown(
+        """
+    If you're a developer or represent a non-profit, you're welcome to access the [open-source version](%s). Feel free to launch your own instance of the website to support your non-profit initiatives and engage with your local constituents.
 
-useownkeyagree = st.checkbox(
-    "I agree, use my own key!", disabled=st.session_state.requestgeneration
-)
-
-if useownkeyagree:
-    st.write("Great! Your key will be used during this application.")
-    personal_key = st.text_input(
-        "Enter key here:",
-        help="The key should begin with sk-",
-        disabled=st.session_state.requestgeneration,
+    Moreover, if you prefer unrestricted usage of this tool, you have the option to apply your own OpenAI API key. Please grant permission for your key's utilization through this portal. Rest assured, your key won't be stored and is sent directly to the OpenAI API only when generating your letter.
+                """
+        % github_link
     )
+
+    openAIAPIlink = "https://openai.com/blog/openai-api"
+
+    st.markdown(
+        """
+    Additionally, if you'd like to use this website without limits, you can use your own [openAI API key](%s). You must consent to the use of your key through this portal. For your protection and privacy, the key is not saved, and is sent directly to the openAI API when you request your letter generated.
+    """
+        % openAIAPIlink
+    )
+
+    useownkeyagree = st.checkbox(
+        "I agree, use my own key!", disabled=st.session_state.requestgeneration
+    )
+
+    if useownkeyagree:
+        st.write("Great! Your key will be used during this application.")
+        personal_key = st.text_input(
+            "Enter key here:",
+            help="The key should begin with sk-",
+            disabled=st.session_state.requestgeneration,
+        )
 
 with st.form("postal_form"):
     # other inputs
