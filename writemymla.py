@@ -450,7 +450,7 @@ if st.session_state.requestgeneration:
     {questions}
     """
     st.download_button(
-        "Download a copy of your entered information. This download your text and reset the form.",
+        "Download a copy of your entered information. This will download your text and reset the form.",
         inputTotal,
         on_click=restart_form,
     )
