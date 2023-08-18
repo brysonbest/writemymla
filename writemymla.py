@@ -47,8 +47,8 @@ def request_letter_generation():
         and support
         and questions
     ):
-        st.session_state.requestgeneration = not st.session_state.requestgeneration
         st.session_state.formincomplete = False
+        st.session_state.requestgeneration = not st.session_state.requestgeneration
     else:
         st.session_state.formincomplete = True
 
