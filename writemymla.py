@@ -66,7 +66,7 @@ github_link = "https://github.com/brysonbest/writemymla"
 donation_link = "https://www.buymeacoffee.com/brysonbest"
 st.markdown(
     """
-# 📝       🇨🇦Connect with Your Provincial Representative Effortlessly Using AI Assistance
+# 📝         🇨🇦Connect with Your Provincial Representative Effortlessly Using AI Assistance
 
 ## Whether your Provincial Representative is known as an MLA, MPP, MNA, or MHA, our tool is designed to aid you in crafting a letter to express your concerns. The process is simple:
 
