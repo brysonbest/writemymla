@@ -76,7 +76,7 @@ st.markdown(
 
 You can choose to print and mail the letter or email it to your representative. Please note that this application utilizes the OpenAI API, a subscription-based service. Resources are limited, so the website's capacity may be quickly reached. Limits are reset monthly.
 
-If you find this website useful and would like to contribute to its running costs, consider [supporting the project](%s)
+If you find this website useful and would like to contribute to its running costs, consider [supporting the project](%s).
 
 """
     % donation_link
@@ -385,7 +385,7 @@ if st.session_state.requestgeneration:
             # Sorry, there was an error sending your responses to chatGPT for generation, as the service has run out of free generation for this month.
             ### As a non-profit service, there are a limited number of letters that may be generated in a month.
             
-            If you are interested in supporting this project, and increasing the number of available generations, please consider making a donation. All proceeds go directly towards the ongoing support of this web application. If you make a donation, it will usually take 24-48 hours before funding is added to this website and letters can continue to be generated.
+            If you are interested in supporting this project, and increasing the number of available generations, please consider [making a donation](%s). All proceeds go directly towards the ongoing support of this web application. If you make a donation, it will usually take 24-48 hours before funding is added to this website and letters can continue to be generated.
             
             Otherwise, please try again later. Once donations are exhausted, the limit will reset naturally every month.
             
@@ -393,7 +393,8 @@ if st.session_state.requestgeneration:
 
             If you'd like to download your information as a text file so that you can easily enter it again in the future, you can use the download link below.
 
-            """
+"""
+            % donation_link
         )
 
     except:
