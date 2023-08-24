@@ -22,23 +22,24 @@ if "formprogress" not in st.session_state:
     st.session_state.formprogress = 0
 
 
-# Callback function to make sure the state changes with each button click
+# Callback function when submitting postal code
 def postal_submit():
     st.session_state.postalcomplete = not st.session_state.postalcomplete
     st.session_state.requestgeneration = False
 
 
-# Callback function to make sure the state changes with each button click
+# Callback function to restart the form
 def restart_form():
     st.session_state.postalcomplete = False
     st.session_state.requestgeneration = False
 
 
-# Callback function to make sure the state changes with each button click
+# Callback function that clears the incomplete form warning
 def clear_incomplete_inprogress():
     st.session_state.formincomplete = False
 
 
+# Callback function that takes in form information and starts letter generation
 def request_letter_generation(
     user_name, described_issue, personal_impact, resolution, support, questions
 ):
@@ -62,19 +63,24 @@ def request_letter_generation(
     st.session_state.formprogress += 1
 
 
+# Project and donation links
 github_link = "https://github.com/brysonbest/writemymla"
 donation_link = "https://www.buymeacoffee.com/brysonbest"
+
+# Page content
 st.markdown(
     """
-# 📝         🇨🇦Connect with Your Provincial Representative Effortlessly Using AI Assistance
+    # 🇨🇦 Write My MLA (or MPP, MNA, MHA)
 
-## Whether your Provincial Representative is known as an MLA, MPP, MNA, or MHA, our tool is designed to aid you in crafting a letter to express your concerns. The process is simple:
+### Connect with Your Provincial Representative Using AI Assistance
+
+#### Whether your Provincial Representative is known as an MLA, MPP, MNA, or MHA, our tool is designed to aid you in crafting a letter to express your concerns. The process is simple:
 
 1. Enter your postal code to identify your local representative.
 2. Provide key details about the matter you wish to address.
 3. Obtain your ready-to-use letter for sending!
 
-You can choose to print and mail the letter or email it to your representative. Please note that this application utilizes the OpenAI API, a subscription-based service. Resources are limited, so the website's capacity may be quickly reached. Limits are reset monthly.
+You can choose to print and mail the letter or email it to your representative. Please note that this application utilizes the OpenAI API, a subscription-based service. Resources are limited, so the website's capacity may be reached quickly. Limits are reset monthly.
 
 If you find this website useful and would like to contribute to its running costs, consider [supporting the project](%s).
 
@@ -82,13 +88,27 @@ If you find this website useful and would like to contribute to its running cost
     % donation_link
 )
 
+# Disclaimer
+with st.expander("Disclaimer"):
+    openAIDisclaimer = "https://openai.com/policies/terms-of-use"
+
+    st.markdown(
+        """
+    The application is not intended to be used for any other purpose. Information is not vetted prior to dissemination, and may be inaccurate. Please go to your provincial website for the most up-to-date information. The application is not affiliated with any government body. Any actions taken based on the information provided by this application are the sole responsibility of the user. The application is not responsible for any damages or losses incurred by the user. Your personal information is not stored by the application.
+
+    By using this application, you agree to the [OpenAI API Terms of Use](%s). While the application does not store your information, it is sent to the OpenAI API for processing. Please review the terms of use for more information and to understand your rights and responsibilities.
+
+    """
+        % openAIDisclaimer
+    )
+
 
 with st.expander("Information for Developers and Non-Profits."):
     st.markdown(
         """
     If you're a developer or represent a non-profit, you're welcome to access the [open-source version](%s). Feel free to launch your own instance of the website to support your non-profit initiatives and engage with your local constituents.
 
-    Moreover, if you prefer unrestricted usage of this tool, you have the option to apply your own OpenAI API key. Please grant permission for your key's utilization through this portal. Rest assured, your key won't be stored and is sent directly to the OpenAI API only when generating your letter.
+    Moreover, if you prefer unrestricted usage of this tool, you have the option to apply your own OpenAI API key. Please grant permission for your key's utilization through this portal. Rest assured, your key won't be stored and is sent directly to the OpenAI API only when generating your letter. Additionally, using your own key will increase the default character limit for your form answers.
                 """
         % github_link
     )
@@ -114,6 +134,7 @@ with st.expander("Information for Developers and Non-Profits."):
             disabled=st.session_state.requestgeneration,
         )
 
+# Postal form and submission to search by postal code
 with st.form("postal_form"):
     # other inputs
     postal = st.text_input(
@@ -138,6 +159,8 @@ formQuestions = {
     "support": "What support, specific help, or action do you need from your representative?",
     "questions": "Do you have any questions you would like answered by your representative? Enter your questions here:",
 }
+
+# if the postal code is submitted, show the form feedback and the form for user completion
 
 if st.session_state.postalcomplete:
     st.button("Restart", on_click=restart_form)
@@ -215,6 +238,10 @@ if st.session_state.postalcomplete:
             mla_district = st.text_input(f"""{mla} District""", value=mla_district)
             mla_address = st.text_input(f"""{mla} Address""", value=mla_address)
 
+            characterLimit = True
+            if useownkeyagree and personal_key and len(personal_key) > 0:
+                characterLimit = False
+
             with st.form("input_form"):
                 # other inputs
                 user_name = st.text_input(
@@ -222,27 +249,27 @@ if st.session_state.postalcomplete:
                 )
                 described_issue = st.text_area(
                     f"""1. {formQuestions['issue']}""",
-                    max_chars=500,
+                    max_chars=500 if characterLimit else 5000,
                     help="Max 500 characters.",
                 )
                 personal_impact = st.text_area(
                     f"""2. {formQuestions['personal']}""",
-                    max_chars=250,
+                    max_chars=250 if characterLimit else 5000,
                     help="Max 250 characters.",
                 )
                 resolution = st.text_area(
                     f"""3. {formQuestions['resolve']}""",
-                    max_chars=250,
+                    max_chars=250 if characterLimit else 5000,
                     help="Max 250 characters.",
                 )
                 support = st.text_area(
                     f"""4. {formQuestions['support']}""",
-                    max_chars=250,
+                    max_chars=250 if characterLimit else 5000,
                     help="Max 250 characters.",
                 )
                 questions = st.text_area(
                     f"""5. {formQuestions['questions']}""",
-                    max_chars=250,
+                    max_chars=250 if characterLimit else 5000,
                     help="Max 250 characters.",
                 )
 
