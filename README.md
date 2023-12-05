@@ -52,7 +52,7 @@
 
 ![search screen](public/screenshots/writemymla.png)
 
-Write My MLA is an application that helps Canadian citizens write their local MLA, MPP, MNA, or MHA. The application uses the postal code of the user to search for their representative, and then input the issue that they're experiencing. Their experience is sent to the OpenAI api to generate a professional letter that can then be sent on to their local representative.
+Write My MLA is an application that helps Canadian citizens write their local MLA, MPP, MNA, or MHA. The application uses the postal code of the user to search for their representative, and then input the issue that they're experiencing. Their experience is sent to either the OpenAI api, or a local instance of the GPT4all api to generate a professional letter that can then be sent on to their local representative.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -173,6 +173,10 @@ Project Link: [https://github.com/brysonbest/writemymla](https://github.com/brys
 
 - [Geocoder.ca](https://geocoder.ca/) Provided the API used to accurately search using postal code information.
 - [Represent Civic Information API](https://represent.opennorth.ca/) Provided the API used to search for representatives based on location.
+- [OpenAI API](https://openai.com/) Provided the API used to generate letters based on user input details.
+- [GPT4All API](https://gpt4all.io/index.html) provided an open-source alternative for letter generation based on the user details.
+
+OpenAI Provides the letter generation based on the user details
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
