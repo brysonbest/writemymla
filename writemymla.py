@@ -353,83 +353,84 @@ if st.session_state.requestgeneration:
     if useownkeyagree and personal_key and len(personal_key) > 0:
         ai.api_key = personal_key
     try:
-        if usegpt4All:
-            completion = ai.Completion.create(
-                # model="gpt-3.5-turbo-16k",
-                model="gpt-3.5-turbo",
-                temperature=ai_temp,
-                prompt=extendedPrompt,
-                max_tokens=1000,
-                top_p=0.95,
-                n=1,
-                stream=False,
-            )
-            response_out = completion["choices"][0]["text"]
-        else:
-            completion = ai.ChatCompletion.create(
-                # model="gpt-3.5-turbo-16k",
-                model="gpt-3.5-turbo",
-                temperature=ai_temp,
-                # optimized input to 421 tokens
-                # text input at 1 question @ 500 and 5 questions @ 250 characters ~ 1750 characters ~ 300 tokens
-                # response of 1000 words should be maximum of 3000 tokens
-                messages=[
-                    {
-                        "role": "user",
-                        "content": "Generate a letter to my local political representative regarding my issues and desired solutions.",
-                    },
-                    {
-                        "role": "system",
-                        "content": f"Do not include the personal address of the writer or political representative. Do not include placeholders for this information. Do not include a subject line. You must only write the body of the letter.",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"This is the local political representative's information:\nTitle: {mla}\nName: {mla_name}\nParty: {mla_party}\nDistrict: {mla_district}",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Issues I'm Dealing With:\n{described_issue}",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Sender's Name for the Letter: {user_name}",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Personal Impact of the Issues: {personal_impact}",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Proposed Resolution for My Issues: {resolution}",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Requested Support from Representative: {support}",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Additional Questions for Representative: {questions}",
-                    },
-                    {"role": "user", "content": f"Letter Length Limit: 1000 words"},
-                    {
-                        "role": "user",
-                        "content": f"Maintain Professional Tone: Addressing a Political Representative",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Writer Would Like to Be Contacted About the Issue and Kept Informed",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Sign the letter with the writer's name: {user_name}",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Generate solely the body of a letter to the local political representative emphasizing the issue, its personal impact, and potential solutions.",
-                    },
-                ],
-            )
-            response_out = completion["choices"][0]["message"]["content"]
+        # if usegpt4All:
+        #     completion = ai.chat.completions.create(
+        #         # model="gpt-3.5-turbo-16k",
+        #         model="gpt-3.5-turbo",
+        #         temperature=ai_temp,
+        #         prompt=extendedPrompt,
+        #         max_tokens=1000,
+        #         top_p=0.95,
+        #         n=1,
+        #         stream=False,
+        #     )
+        #     response_out = completion["choices"][0]["text"]
+        # else:
+        completion = ai.chat.completions.create(
+            # model="gpt-3.5-turbo-16k",
+            model="gpt-3.5-turbo",
+            temperature=ai_temp,
+            # optimized input to 421 tokens
+            # text input at 1 question @ 500 and 5 questions @ 250 characters ~ 1750 characters ~ 300 tokens
+            # response of 1000 words should be maximum of 3000 tokens
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Generate a letter to my local political representative regarding my issues and desired solutions.",
+                },
+                {
+                    "role": "system",
+                    "content": f"Do not include the personal address of the writer or political representative. Do not include placeholders for this information. Do not include a subject line. You must only write the body of the letter.",
+                },
+                {
+                    "role": "user",
+                    "content": f"This is the local political representative's information:\nTitle: {mla}\nName: {mla_name}\nParty: {mla_party}\nDistrict: {mla_district}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Issues I'm Dealing With:\n{described_issue}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Sender's Name for the Letter: {user_name}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Personal Impact of the Issues: {personal_impact}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Proposed Resolution for My Issues: {resolution}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Requested Support from Representative: {support}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Additional Questions for Representative: {questions}",
+                },
+                {"role": "user", "content": f"Letter Length Limit: 1000 words"},
+                {
+                    "role": "user",
+                    "content": f"Maintain Professional Tone: Addressing a Political Representative",
+                },
+                {
+                    "role": "user",
+                    "content": f"Writer Would Like to Be Contacted About the Issue and Kept Informed",
+                },
+                {
+                    "role": "user",
+                    "content": f"Sign the letter with the writer's name: {user_name}",
+                },
+                {
+                    "role": "user",
+                    "content": f"Generate solely the body of a letter to the local political representative emphasizing the issue, its personal impact, and potential solutions.",
+                },
+            ],
+        )
+        # response_out = completion["choices"][0]["message"]["content"]
+        response_out = completion.choices[0].message.content
 
         st.markdown(f"""# Your Generated Letter: """)
         st.divider()
@@ -463,7 +464,7 @@ if st.session_state.requestgeneration:
             response_out,
         )
 
-    except ai.error.RateLimitError as error:
+    except ai.RateLimitError as error:
         print(error)
         st.markdown(
             f"""
