@@ -76,13 +76,13 @@ st.markdown(
 
 ### Connect with Your Provincial Representative Using AI Assistance
 
-#### Whether your Provincial Representative is known as an MLA, MPP, MNA, or MHA, our tool is designed to aid you in crafting a letter to express your concerns. The process is simple:
+#### Whether your Provincial Representative is known as an MLA, MPP, MNA, or MHA, our tool will help you craft a letter to express your concerns. The process is simple:
 
 1. Enter your postal code to identify your local representative.
 2. Provide key details about the matter you wish to address.
 3. Obtain your ready-to-use letter for sending!
 
-You can choose to print and mail the letter or email it to your representative. Please note that this application utilizes the OpenAI API, a subscription-based service. Resources are limited, so the website's capacity may be reached quickly. Limits are reset monthly.
+You can choose to print and mail the letter or email it to your representative. Please note that this application uses the OpenAI API, a subscription-based service. Resources are limited, so the website's capacity may be reached quickly. Limits are reset monthly.
 
 If you find this website useful and would like to contribute to its running costs, consider [supporting the project](%s).
 
