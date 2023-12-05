@@ -4,6 +4,8 @@ import requests
 from datetime import date
 
 ai.api_key = st.secrets["openai_key"]
+# ai.api_base = "https://api.openai.com/v1"
+# local ai.api_base = "http://localhost:4891/v1"
 
 # how creative the AI should be
 ai_temp = 0.99
@@ -103,21 +105,51 @@ with st.expander("Disclaimer"):
     )
 
 
-with st.expander("Information for Developers and Non-Profits."):
+with st.expander(
+    "Information for Developers, Non-Profits - Free and Low-Cost Alternatives."
+):
     st.markdown(
         """
     If you're a developer or represent a non-profit, you're welcome to access the [open-source version](%s). Feel free to launch your own instance of the website to support your non-profit initiatives and engage with your local constituents.
-
-    Moreover, if you prefer unrestricted usage of this tool, you have the option to apply your own OpenAI API key. Please grant permission for your key's utilization through this portal. Rest assured, your key won't be stored and is sent directly to the OpenAI API only when generating your letter. Additionally, using your own key will increase the default character limit for your form answers.
                 """
         % github_link
     )
+
+    gpt4All = "https://gpt4all.io/index.html"
+
+    st.markdown(
+        """
+        FREE ALTERNATIVE: 
+    You can also run a local version of [GPT4All](%s), an open-source, locally-run large language model chat interface for free.
+                """
+        % gpt4All
+    )
+
+    gpt4AllAPISettings = "https://docs.gpt4all.io/gpt4all_chat.html#server-mode"
+
+    st.markdown(
+        """
+        In order to use gpt4all with this program, first download and install gpt4All, download and install a language model of choice, and activate access to the api through [server mode](%s). Once completed, tick the box below to switch from openAI to the local gpt4All server. 
+        """
+        % gpt4AllAPISettings
+    )
+
+    usegpt4All = st.checkbox(
+        "Use local gpt4All to generate a response!",
+        disabled=st.session_state.requestgeneration,
+    )
+
+    if usegpt4All:
+        st.write(
+            "Fantastic! Make sure you're running gpt4All on your computer, you've downloaded a language model, and you have enabled API access."
+        )
+        ai.api_base = "http://localhost:4891/v1"
 
     openAIAPIlink = "https://openai.com/blog/openai-api"
 
     st.markdown(
         """
-    Additionally, if you'd like to use this website without limits, you can use your own [openAI API key](%s). You must consent to the use of your key through this portal. For your protection and privacy, the key is not saved, and is sent directly to the openAI API when you request your letter generated.
+    If you prefer unrestricted usage of this tool, you also have the option to apply your own OpenAI API key. Please grant permission for your key's utilization through this portal. Rest assured, your key won't be stored and is sent directly to the OpenAI API only when generating your letter. Additionally, using your own key will increase the default character limit for your form answers. If you'd like to use this website without limits, you can use your own [openAI API key](%s). You must consent to the use of your key through this portal. For your protection and privacy, the key is not saved, and is sent directly to the openAI API when you request your letter generated.
     """
         % openAIAPIlink
     )
@@ -242,6 +274,9 @@ if st.session_state.postalcomplete:
             if useownkeyagree and personal_key and len(personal_key) > 0:
                 characterLimit = False
 
+            if usegpt4All:
+                characterLimit = False
+
             with st.form("input_form"):
                 # other inputs
                 user_name = st.text_input(
@@ -311,70 +346,90 @@ if st.session_state.requestgeneration:
     # check for completed form:
     # get the letter from openai
     addressResponse = f"""Address: {mla_address}.""" if isAddress else None
+
+    # Prompt for use in local requests to gpt4All
+    extendedPrompt = f"""I would like you to generate a letter to my local political representative regarding my issues and desired solutions. Please use all of the following information in order to address a professional letter to my political representative. My local political representative holds the position of: {mla}. My local political representative's name is {mla_name}. My local political representative's party is {mla_party}. My local political representative's district is {mla_district}. I am the writer. This is how I've described my issue: {described_issue}. This is how it has personally impacted me: {personal_impact}. This is the resolution I would like: {resolution}. This is the support I would also like right now: {support}. I also have some questions: {questions}. However if I have not provided you a question, no need to address that in the letter. Please maintain a professional tone. You are addressing a political representative and should be professional. Do not use any gendered pronouns, and if the politician must be addressed directly, use their full name. The writer would like to be contacted about the issue/issues and kept informed about any progress. The generated letter should emphasize the issue, its personal impact, and potential solutions. Do not include the personal address of the writer or political representative. Do not include placeholders for this information. Do not include a subject line. Do not date the letter. You must only write the body of the letter. I am the writer. Please sign with my name: {user_name}.  """
+
     if useownkeyagree and personal_key and len(personal_key) > 0:
         ai.api_key = personal_key
     try:
-        completion = ai.ChatCompletion.create(
-            # model="gpt-3.5-turbo-16k",
-            model="gpt-3.5-turbo",
-            temperature=ai_temp,
-            # optimized input to 421 tokens
-            # text input at 1 question @ 500 and 5 questions @ 250 characters ~ 1750 characters ~ 300 tokens
-            # response of 1000 words should be maximum of 3000 tokens
-            aisuggestedmessages=[
-                {
-                    "role": "user",
-                    "content": "Generate a letter to my local political representative regarding my issues and desired solutions.",
-                },
-                {
-                    "role": "system",
-                    "content": "You will need to address the letter to the local political representative using the provided information.",
-                },
-                {
-                    "role": "user",
-                    "content": f"Local Political Representative Information:\nTitle: {mla}\nName: {mla_name}\nParty: {mla_party}\nEmail: {mla_email}\nPhone: {mla_phone}\nDistrict: {mla_district}\n{addressResponse}",
-                },
-                {
-                    "role": "user",
-                    "content": f"Issues I'm Dealing With:\n{described_issue}",
-                },
-                {
-                    "role": "user",
-                    "content": f"Sender's Name for the Letter: {user_name}",
-                },
-                {
-                    "role": "user",
-                    "content": f"Personal Impact of the Issues: {personal_impact}",
-                },
-                {
-                    "role": "user",
-                    "content": f"Proposed Resolution for My Issues: {resolution}",
-                },
-                {
-                    "role": "user",
-                    "content": f"Requested Support from Representative: {support}",
-                },
-                {
-                    "role": "user",
-                    "content": f"Additional Questions for Representative: {questions}",
-                },
-                {"role": "user", "content": f"Letter Length Limit: 1000 words"},
-                {
-                    "role": "user",
-                    "content": f"Maintain Professional Tone: Addressing a Political Representative",
-                },
-                {
-                    "role": "user",
-                    "content": f"Writer Would Like to Be Contacted About the Issue and Kept Informed",
-                },
-                {"role": "user", "content": f"Use Writer's Name: {user_name}"},
-                {
-                    "role": "user",
-                    "content": f"Generate a letter to the local political representative emphasizing the issue, its personal impact, and potential solutions.",
-                },
-            ],
-        )
-        response_out = completion["choices"][0]["message"]["content"]
+        if usegpt4All:
+            completion = ai.Completion.create(
+                # model="gpt-3.5-turbo-16k",
+                model="gpt-3.5-turbo",
+                temperature=ai_temp,
+                prompt=extendedPrompt,
+                max_tokens=1000,
+                top_p=0.95,
+                n=1,
+                stream=False,
+            )
+            response_out = completion["choices"][0]["text"]
+        else:
+            completion = ai.ChatCompletion.create(
+                # model="gpt-3.5-turbo-16k",
+                model="gpt-3.5-turbo",
+                temperature=ai_temp,
+                # optimized input to 421 tokens
+                # text input at 1 question @ 500 and 5 questions @ 250 characters ~ 1750 characters ~ 300 tokens
+                # response of 1000 words should be maximum of 3000 tokens
+                messages=[
+                    {
+                        "role": "user",
+                        "content": "Generate a letter to my local political representative regarding my issues and desired solutions.",
+                    },
+                    {
+                        "role": "system",
+                        "content": f"Do not include the personal address of the writer or political representative. Do not include placeholders for this information. Do not include a subject line. You must only write the body of the letter.",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"This is the local political representative's information:\nTitle: {mla}\nName: {mla_name}\nParty: {mla_party}\nDistrict: {mla_district}",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Issues I'm Dealing With:\n{described_issue}",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Sender's Name for the Letter: {user_name}",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Personal Impact of the Issues: {personal_impact}",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Proposed Resolution for My Issues: {resolution}",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Requested Support from Representative: {support}",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Additional Questions for Representative: {questions}",
+                    },
+                    {"role": "user", "content": f"Letter Length Limit: 1000 words"},
+                    {
+                        "role": "user",
+                        "content": f"Maintain Professional Tone: Addressing a Political Representative",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Writer Would Like to Be Contacted About the Issue and Kept Informed",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Sign the letter with the writer's name: {user_name}",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Generate solely the body of a letter to the local political representative emphasizing the issue, its personal impact, and potential solutions.",
+                    },
+                ],
+            )
+            response_out = completion["choices"][0]["message"]["content"]
 
         st.markdown(f"""# Your Generated Letter: """)
         st.divider()
@@ -388,7 +443,7 @@ if st.session_state.requestgeneration:
         email_mla = mla.replace(" ", "%20")
         email_mla_name = mla_name.replace(" ", "%20")
         email_subject = (
-            f"""{email_user}%20-{email_date}%20to%20{mla}%20{email_mla_name}"""
+            f"""{email_user}%20{email_date}%20to%20{mla}%20{email_mla_name}"""
         )
         email_link = f"""mailto:{mla_email}?subject={email_subject}&body={email_body}"""
 
@@ -403,7 +458,10 @@ if st.session_state.requestgeneration:
             % email_link
         )
         # include an option to download a txt file
-        st.download_button("Download the letter", response_out)
+        st.download_button(
+            "Download the letter. Please be aware that after downloading, the generated letter will be reset.",
+            response_out,
+        )
 
     except ai.error.RateLimitError as error:
         print(error)
@@ -427,7 +485,7 @@ if st.session_state.requestgeneration:
     except:
         st.markdown(
             f"""
-                # Sorry, there was an error sending your responses to chatGPT for generation.
+                # Sorry, there was an error sending your responses to the AI for generation.
                 ## Please try again.
                 """
         )
